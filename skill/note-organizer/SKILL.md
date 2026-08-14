@@ -98,7 +98,23 @@ description: >
      ```
      `.doc` 旧格式 Word COM 可直接打开，无需转换。
    - **Linux**（装有 LibreOffice）：`soffice --headless --convert-to txt 文档.docx`（HTML 用 `--convert-to html`）。
-4. **兜底（任意平台有 Python 即可）**：解包解析 `word/document.xml`（docx skill 的 `unpack.py`：`python <docx-skill目录>/scripts/office/unpack.py 文档.docx 解包目录/`），或 `pip install python-docx` 后遍历段落与表格。
+4. **Python 路径（Windows 等仅有 Python 的环境的首选）**：
+   - 零依赖（标准库，无需 pip）——段落按样式名区分标题层级，图片从 `word/media/` 原样解出（字节级无损）：
+     ```python
+     import zipfile, xml.etree.ElementTree as ET
+     NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"; W = "{%s}" % NS
+     with zipfile.ZipFile("文档.docx") as z:
+         root = ET.fromstring(z.read("word/document.xml"))
+         for p in root.iter(W+"p"):
+             txt = "".join(t.text or "" for t in p.iter(W+"t"))
+             if txt.strip():
+                 style = p.find(W+"pPr/"+W+"pStyle")
+                 print(f"[{style.get(W+'val') if style is not None else 'body'}] {txt}")
+         for n in z.namelist():                        # 原图无损导出到 附件/
+             if n.startswith("word/media/"): z.extract(n, "附件/")
+     ```
+   - 或 `pip install python-docx` 后遍历：`Document("文档.docx").paragraphs`（`p.style.name` 取 Heading 1/2 层级）与 `.tables`（行=row.cells）；注意批注/修订语义需自行解析 XML，样式（字体/颜色/分页）不保留——知识内容（文字/标题/表格/原图）无损即可，排版样式不进笔记。
+   - `.doc` 旧格式 Python 无法直接解析：macOS 用 `textutil`、Windows 用 Word COM、Linux 用 `soffice` 转换，或用 docx skill 的 `unpack.py` 处理 `.docx`。
 5. **结构与媒体盘点**：记录标题层级、表格、图片清单；表格转为 Markdown 表；承载关键信息的图片保存到 vault 附件目录（`.obsidian/app.json` 的 `attachmentFolderPath`，默认 `./附件`），笔记中用 `![[附件/xxx.png]]` 引用；纯装饰图跳过。
 6. **提取产物**：一份"文档知识清单"（章节结构 + 关键数据 + 表格 + 图片引用），作为归类与写作的输入。
 
