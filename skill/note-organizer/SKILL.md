@@ -81,15 +81,26 @@ description: >
 
 用户给出 Word 文档并要"学习文档里的知识、整合进笔记"时，本流程接管输入环节；归类、写作、校验步骤与上文完全一致。目标是**把文档中的知识提炼进既有框架**，而不是复制文档本身。
 
-### 6.1 读取与结构提取（工具链按可用性选择）
+### 6.1 读取与结构提取（跨平台工具链，按可用性选择）
 
-1. **确定输入**：解析用户给的路径；目录则逐篇走同一流程；`.doc` 旧格式先转换（macOS：`textutil -convert docx 旧文件.doc -output 旧文件.docx`，注意参数是 `-output` 无 `-o` 简写；或 `textutil -convert txt 旧文件.doc -stdout` 直接取文本）。
-2. **文本提取**，按优先级选用可用工具：
-   - macOS `textutil`（自带）：`textutil -convert txt 文档.docx -stdout` 取纯文本；需要保留标题/表格结构时用 `textutil -convert html 文档.docx -stdout`。
-   - `pandoc`：`pandoc 文档.docx -o 文档.md`；含修订记录时 `--track-changes=all`。
-   - 两者皆无：解包解析 `word/document.xml`（docx skill 的 `unpack.py`：`python <docx-skill目录>/scripts/office/unpack.py 文档.docx 解包目录/`）。
-3. **结构与媒体盘点**：记录标题层级、表格、图片清单；表格转为 Markdown 表；承载关键信息的图片保存到 vault 附件目录（`.obsidian/app.json` 的 `attachmentFolderPath`，默认 `./附件`），笔记中用 `![[附件/xxx.png]]` 引用；纯装饰图跳过。
-4. **提取产物**：一份"文档知识清单"（章节结构 + 关键数据 + 表格 + 图片引用），作为归类与写作的输入。
+1. **确定输入**：解析用户给的路径；目录则逐篇走同一流程；`.doc` 旧格式先按本机可用工具转换。
+2. **首选 `pandoc`（macOS/Windows/Linux 通用，需安装）**：`pandoc 文档.docx -o 文档.md`；含修订记录时加 `--track-changes=all`。pandoc 输出的 Markdown 直接保留标题/表格结构，后续整理成本最低。
+3. **无 pandoc 时的平台原生路径**：
+   - **macOS**（自带 `textutil`）：`textutil -convert txt 文档.docx -stdout` 取纯文本；保留结构用 `-convert html`；`.doc` 转换用 `textutil -convert docx 旧文件.doc -output 新文件.docx`（注意参数是 `-output`，无 `-o` 简写）。
+   - **Windows 10/11**（装有 MS Office）：PowerShell 调用 Word COM 提取，注意以只读方式打开、提取后不保存直接退出（保证不改动用户文档）：
+     ```powershell
+     $w = New-Object -ComObject Word.Application
+     $w.Visible = $false
+     $d = $w.Documents.Open("C:\路径\文档.docx", $false, $true)   # 只读打开
+     $d.Content.Text                                            # 纯文本
+     $d.SaveAs2("C:\路径\提取.html", 8)                          # 8=HTML(保留标题/表格)；2=纯文本
+     $d.Close($false); $w.Quit()
+     ```
+     `.doc` 旧格式 Word COM 可直接打开，无需转换。
+   - **Linux**（装有 LibreOffice）：`soffice --headless --convert-to txt 文档.docx`（HTML 用 `--convert-to html`）。
+4. **兜底（任意平台有 Python 即可）**：解包解析 `word/document.xml`（docx skill 的 `unpack.py`：`python <docx-skill目录>/scripts/office/unpack.py 文档.docx 解包目录/`），或 `pip install python-docx` 后遍历段落与表格。
+5. **结构与媒体盘点**：记录标题层级、表格、图片清单；表格转为 Markdown 表；承载关键信息的图片保存到 vault 附件目录（`.obsidian/app.json` 的 `attachmentFolderPath`，默认 `./附件`），笔记中用 `![[附件/xxx.png]]` 引用；纯装饰图跳过。
+6. **提取产物**：一份"文档知识清单"（章节结构 + 关键数据 + 表格 + 图片引用），作为归类与写作的输入。
 
 ### 6.2 归类与写作的特殊规则
 
