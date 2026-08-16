@@ -54,6 +54,7 @@ graph TD
         RV["RISC-V<br/>2010/开放"]
         ARM32["ARM (AArch32)<br/>1985/商业授权"]
         A64["ARM (AArch64)<br/>2011/商业授权"]
+        LOONG["LoongArch（龙芯）<br/>2021/自研开放"]
         MIPS["MIPS<br/>1981/开放后式微"]
         SP["SPARC<br/>1985/边缘化"]
         PW["POWER/PowerPC<br/>1990/服务器专用"]
@@ -61,6 +62,21 @@ graph TD
     subgraph "CISC 家族（复杂指令集）"
         X86["x86/x86-64<br/>1978/Intel+AMD"]
         Z["IBM z/Architecture<br/>大型机"]
+        VAX["VAX<br/>1977/历史"]
+        M68K["Motorola 68k<br/>1979/历史"]
+    end
+    subgraph "MCU 级（8/16/32 位微控制器）"
+        M8051["8051<br/>1980"]
+        AVR["AVR<br/>1996"]
+        PIC["PIC<br/>1976"]
+        MSP["MSP430<br/>1992"]
+        XT["Xtensa<br/>ESP32 用"]
+        CM["Cortex-M<br/>ARM"]
+    end
+    subgraph "加速器 ISA（协处理器层级，附属于宿主）"
+        GPU["GPU：PTX/SASS、GCN/CDNA/RDNA、Xe"]
+        NPU["NPU：各厂商私有向量/张量 ISA"]
+        DSP["DSP/VLIW：Itanium(IA-64)、TI C6000"]
     end
 ```
 
@@ -69,10 +85,17 @@ graph TD
 | **x86/x86-64** | 1978 Intel 8086；2003 AMD 提出 x86-64 | CISC（微码译码） | Intel/AMD 交叉授权 | PC、服务器、数据中心（存量最大） |
 | **ARM（AArch64）** | 1985 Acorn；2011 ARMv8 引入 AArch64 | RISC | Arm 公司 IP 授权 | 移动、嵌入式、云服务器、AI（份额最大出货量） |
 | **RISC-V** | 2010 UC Berkeley | RISC | **开放免费** | 嵌入式、AI 加速器、新势力 SoC；服务器与移动渗透中 |
+| **LoongArch（龙芯）** | 2021 龙芯中科发布 | RISC 风格 | 开放（自研，可授权） | 国产自主 CPU（3A5000 起），Linux 主线支持；二进制翻译兼容 x86/MIPS |
+| C-SKY | 2002 杭州中天微（现平头哥） | RISC | 国产自研 | 国产嵌入式 CPU（CK800 系列），与 RISC-V 竞争后逐渐并入玄铁生态 |
 | MIPS | 1981 Stanford | RISC | 曾开放（2019 后式微） | 路由器/嵌入式存量；新设计基本停止 |
 | SPARC | 1985 Sun | RISC | 曾开放（2017 Oracle 停更） | 边缘化，遗留服务器 |
 | POWER | 1990 IBM（POWER1） | RISC | IBM | 高端服务器/大型机 |
 | z/Architecture | 2000（S/360 1964 的血统） | CISC | IBM | 大型机 |
+| VAX / Motorola 68k | 1977 DEC / 1979 Motorola | CISC | 已停产 | 历史架构（VAX 曾主导迷你机；68k 曾用于 Mac/Amiga） |
+| 8051 / AVR / PIC / MSP430 | 1980-1996 | CISC/哈佛（MCU） | 各厂商 | 单片机（Arduino=AVR、STC=8051、TI MSP430） |
+| Xtensa | 2001 Tensilica（现 Cadence） | RISC（可配置） | IP 授权 | 乐鑫 ESP32 等物联网 SoC 的可配置核 |
+
+> **层级澄清**：上表"平级"指 CPU ISA 契约层。MCU 级架构、GPU/NPU 加速器 ISA 处于**更低或从属的层级**——MCU 是独立 CPU 的 8/16/32 位简化形态；GPU/NPU 的指令集（如 NVIDIA PTX/SASS、AMD CDNA、各家 NPU 向量 ISA）运行在 CPU 的支配之下，不参与"主 CPU 架构"的竞争。
 
 ---
 
@@ -120,6 +143,9 @@ graph TD
 - [RISC-V（Wikipedia：起源与规范）](https://en.wikipedia.org/wiki/RISC-V)
 - [x86-64（AMD64，Wikipedia）](https://en.wikipedia.org/wiki/X86-64)
 - [ARM 架构家族（Wikipedia）](https://en.wikipedia.org/wiki/ARM_architecture_family)
+- [LoongArch（龙芯架构，Wikipedia）](https://en.wikipedia.org/wiki/LoongArch)
+- [Intel Itanium / IA-64（EPIC/VLIW，Wikipedia）](https://en.wikipedia.org/wiki/Itanium)
+- [Intel MCS-51 / 8051（Wikipedia）](https://en.wikipedia.org/wiki/Intel_MCS-51)
 - [MIPS 架构（Wikipedia）](https://en.wikipedia.org/wiki/MIPS_architecture)
 - [POWER/PowerPC（Wikipedia）](https://en.wikipedia.org/wiki/IBM_POWER_architecture)
 - [RISC-V International 官网](https://riscv.org/)
